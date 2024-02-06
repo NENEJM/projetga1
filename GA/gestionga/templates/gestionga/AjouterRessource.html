@@ -1,0 +1,38 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+<div class="row justify-content-center"> <!-- Utilisez 'justify-content-center' pour centrer -->
+    <div class="col-sm-4">
+    <h4 class="text-center" style="color: #070707;">Ajouter un ressource</h4>
+    <div class="custom-form"> <!-- Ajoutez une classe personnalisée pour styliser le formulaire -->
+        <form action="" method="POST">
+            <div>
+                {% csrf_token %}
+                {{ fm7.as_p }}
+            </div>
+            
+        <style>
+            /* CSS personnalisé pour le formulaire */
+            .custom-form {
+                border: 1px solid rgb(8, 8, 8); /* Ajoutez une bordure grise autour du formulaire */
+                padding: 20px; /* Ajoutez un espace intérieur pour le contenu du formulaire */
+                border-radius: 18px; /* Ajoutez des coins arrondis */
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Ajoutez une ombre légère */
+                background-color: #a6f6c6; /* Couleur de fond du formulaire */
+            }
+        
+            /* CSS pour aligner les champs du formulaire */
+            .custom-form label {
+                display: inline-block;
+                width: 90px; /* Ajustez la largeur selon vos besoins */
+            }
+        </style>
+        </div>
+      
+        <br>
+        <input type="submit" class="btn btn-success" value="Ajouter" style="margin-right: 20px;">
+        <a href="{% url 'tableau_ressource' %}" class="btn btn-warning">retour</a>
+    </form> 
+   </div>
+</div>
+<br>
+{% endblock content %}  

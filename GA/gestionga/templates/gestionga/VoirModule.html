@@ -1,0 +1,51 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-sm-8 mx-auto small-content">
+        <br>
+        <h4 class="text-center alert alert-info">Liste Modules</h4>
+        {% if donnees11 %}
+        <table class="table table-success table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Module</th>
+                    <th scope="col">Description Module</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for donnee in donnees11 %}
+                <tr>
+                    <th scope="row">{{donnee.id}}</th>
+                    <td>{{donnee.nom_module}}</td>
+                    <td>{{donnee.description_module}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Ajoutez la pagination sous mon tableau -->
+        <div class="pagination">
+            <span class="step-links">
+                {% if donnees11.has_previous %}
+                    <a href="?page=1" class=" btn btn-warning btn-sm">&laquo; debut</a>
+                    <a href="?page={{ donnees11.previous_page_number }}" class=" btn btn-warning btn-sm">precedent</a>
+                {% endif %}
+                <span class="current-page">
+                    Page {{ donnees11.number }} sur {{ donnees11.paginator.num_pages }}.
+                </span>
+                {% if donnees11.has_next %}
+                    <a href="?page={{ donnees11.next_page_number }}" class=" btn btn-warning btn-sm">suivant</a>
+                    <a href="?page={{ donnees11.paginator.num_pages }}" class=" btn btn-warning btn-sm">fin &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+        <!-- Fin de la pagination -->
+        {% else %}
+        <h4 class="text-center alert alert alert-warning">Aucune donnée disponible pour le moment</h4>
+        {% endif %}
+    </div>
+</div>
+<br>
+<br><br>
+{% endblock content %}

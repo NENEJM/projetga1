@@ -1,0 +1,112 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+<div class="row"> 
+    <div class="col-sm-12 small-content">
+        <br>
+        <h4 class="text-center" style="color: #070707;">RESSOURCES GA</h4>
+        {% if donnees7 %}
+        <br>
+        <div class="mx-auto">
+            <table class="table table-success table-striped">
+                <thead>      
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Nom</th>
+                        <th scope="col">Prenom</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Matricule</th>
+                        <th scope="col">Numero IP</th>
+                        <th scope="col">Departement</th>
+                        <th scope="col">Service</th>
+                        <th scope="col">Statut</th>
+                        <th scope="col">Manager</th>
+                        <th scope="col">Date debut</th>
+                        <th scope="col">Date fin</th>
+                        <th scope="col">Action</th> 
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donnee in donnees7 %}
+                        <tr>
+                            <th scope="row">{{donnee.id}}</th>
+                            <td>{{donnee.nom}}</td>
+                            <td>{{donnee.prenom}}</td>
+                            <td>{{donnee.email}}</td>
+                            <td>{{donnee.matricule}}</td>
+                            <td>{{donnee.numero_ip}}</td>
+                            <td>{{donnee.departement}}</td>
+                            <td>{{donnee.service}}</td>
+                            <td>{{donnee.statut}}</td>
+                            <td>{{donnee.manager}}</td>
+                            <td>{{donnee.date_debut}}</td>
+                            <td>{{donnee.date_fin}}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <!-- Ajoutez une fonction JavaScript pour demander la confirmation -->
+                                    <button class="btn btn-secondary btn-sm mx-3" onclick="confirmModification('{{ donnee.id }}')">Modifier</button>
+                                    <a href="{% url 'voir_pdf' id=donnee.id %}" class="btn btn-primary btn-sm mx-3" target="_blank">Imprimer</a>
+                                    <form action="{% url 'CopieSupprime' donnee.id %}" method="post" class="d-inline">
+                                         {% csrf_token %}
+                                         <input type="submit" class="btn btn-danger btn-sm mr-3" value="Desactiver">
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- Ajoutez la pagination sous mon tableau -->
+        <div class="pagination">
+            <span class="step-links">
+                {% if donnees7.has_previous %}
+                    <a href="?page=1" class=" btn btn-wa rning btn-sm">&laquo; debut</a>
+                    <a href="?page={{ donnees7.previous_page_number }}" class=" btn btn-warning btn-sm">precedent</a>
+                {% endif %}
+                <span class="current-page">
+                    Page {{ donnees7.number }} sur {{ donnees7.paginator.num_pages }}.
+                </span>
+                {% if donnees7.has_next %}
+                    <a href="?page={{ donnees7.next_page_number }}" class=" btn btn-warning btn-sm">suivant</a>
+                    <a href="?page={{ donnees7.paginator.num_pages }}" class=" btn btn-warning btn-sm">fin &raquo;</a>
+                {% endif %}
+            </span>
+            </div>
+        {% else %}
+        <h4 class="text-center alert alert alert-warning">Aucune donnée disponible pour le moment</h4>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function confirmModification(id) {
+        // Utilisez une fenêtre de confirmation JavaScript
+        if (confirm("Voulez-vous vraiment modifier cette ressource?")) {
+            // Si l'utilisateur clique sur OK, demandez le login et le mot de passe
+            const login = prompt("Entrez votre login:");
+            const password = prompt("Entrez votre mot de passe:");
+
+            // Vérifiez si le login et le mot de passe sont remplis
+            if (login && password) {
+                // Si tout est OK, redirigez vers la page de modification avec les paramètres nécessaires
+                window.location.href = `{% url 'UpdateRessource' %}?id=${id}&login=${login}&password=${password}`;
+            } else {
+                // Si l'utilisateur annule la saisie du login ou du mot de passe
+                alert("Annulé. Vous devez fournir un login et un mot de passe.");
+            }
+        }
+    }
+</script>
+
+<br>
+    <a href="{% url 'ajouterressource' %}" class="btn btn-success" style="margin-right: 20px;">Ajouter </a>
+   
+    <a href="{% url 'tableau_ressource_off' %}" class="btn btn-dark">Resources desactivées</a>   
+    <style>
+        .small-content {
+            font-size: 88%;
+        }
+    </style>
+<br><br>
+
+{% endblock content %}

@@ -1,0 +1,59 @@
+{% extends 'gestionga/base.html' %}
+
+{% block content %}
+<br><br><br><br><br><br><br><br><br>
+<div class="button-container">
+    <a href="{% url 'ajoutdroit' %}" class="custom-btn btn-droit">Droit</a>
+
+    <a href="{% url 'ajoutprofil' %}" class="custom-btn btn-profil">Profil</a>
+
+    <a href="{% url 'ajoutdomaine' %}" class="custom-btn btn-domaine">Domaine</a>
+
+    <a href="{% url 'ajoutprogramme' %}" class="custom-btn btn-programme">Programme</a>
+
+    <a href="{% url 'ajouthabilitation' %}" class="custom-btn btn-habilitation">Habilitation</a>
+</div>
+<style>
+    .button-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .custom-btn {
+        padding: 10px 20px;
+        margin-right: 40px; 
+        border: none;
+        border-radius: 5px;
+        color: #070707;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+    .custom-btn:hover {
+        background-color: #4CAF50;
+    }
+
+    .btn-droit {
+        background-color: #3498db;
+    }
+
+    .btn-profil {
+        background-color: #e74c3c;
+    }
+
+    .btn-domaine {
+        background-color: #f39c12;
+    }
+
+    .btn-programme {
+        background-color: #2ecc71;
+    }
+
+    .btn-habilitation {
+        background-color: #9b59b6;
+    }
+</style>
+
+{% endblock content %}

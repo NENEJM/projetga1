@@ -1,0 +1,105 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-sm-10 mx-auto"> 
+        <br>
+        <h4 class="text-center alert alert-info">RECHERCHE PAR MOT</h4> 
+        
+        <!-- Formulaire de recherche stylisé -->
+        <form method="get" action="{% url 'recherche_par_mot' %}" class="my-4"> 
+            {% csrf_token %}
+            <div class="input-group">
+                {{ formM.search.label_tag }}
+                {{ formM.search }}
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+            </div>
+        </form>
+        
+        {% if donnees50 %}
+        <div class="table-container mt-4">
+            <table class="table table-success table-striped custom-table">
+                <thead>
+                    <tr>
+                        
+                        <th scope="col">Module</th>
+                        <th scope="col">Programme</th>
+                        <th scope="col">Intitule</th>
+                        <th scope="col">Typ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donnee in donnees50 %} 
+                    <tr>
+                        
+                        <td>{{donnee.module}}</td>
+                        <td>{{donnee.programme_filiale}}</td>
+                        <td>{{donnee.intitule}}</td>
+                        <td>{{donnee.cmis}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Ajoutez la pagination sous mon tableau -->
+        <div class="pagination mt-3">
+            <span class="step-links">
+                {% if donnees50.has_previous %}
+                    <a href="?page=1" class="btn btn-warning btn-sm">&laquo; début</a>
+                    <a href="?page={{ donnees50.previous_page_number }}" class="btn btn-warning btn-sm">précédent</a>
+                {% endif %}
+                <span class="current-page"> 
+                    Page {{ donnees50.number }} sur {{ donnees50.paginator.num_pages }}.
+                </span>
+                {% if donnees50.has_next %}
+                    <a href="?page={{ donnees50.next_page_number }}" class="btn btn-warning btn-sm">suivant</a>
+                    <a href="?page={{ donnees50.paginator.num_pages }}" class="btn btn-warning btn-sm">fin &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+        <!-- Fin de la pagination -->
+        {% else %}
+        <h4 class="text-center alert alert-warning mt-4">Aucune donnée disponible pour le moment</h4>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    /* Ajoutez le CSS personnalisé pour la table */
+    .custom-table {
+        width: 100%; /* Utilisez une largeur de 100% pour remplir la largeur du conteneur */
+        max-width: 2000px; /* Définissez une largeur maximale pour le tableau */
+        margin: 0 auto; /* Centrez le tableau */
+    }
+
+    /* Ajoutez le CSS personnalisé pour le conteneur de la table */
+    .table-container {
+        overflow-x: auto; /* Ajoutez une barre de défilement horizontale si nécessaire */
+    }
+
+    /* Ajoutez le CSS personnalisé pour le formulaire */
+    .input-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Ajoutez de l'espace entre les éléments */
+    .mt-4 {
+        margin-top: 1.5rem;
+    }
+
+    .mt-3 {
+        margin-top: 1rem;
+    }
+
+    input[type="text"] {
+        width: 40%; /* Ajustez la largeur selon vos besoins */
+        padding: 10px; /* Ajoutez un peu de rembourrage */
+        border: 1px solid #ced4da; /* Couleur de la bordure */
+        border-radius: 20px; /* Bordures arrondies */
+        margin-right: 10px; /* Marge à droite du champ de texte */
+    }
+</style>
+
+{% endblock content %}

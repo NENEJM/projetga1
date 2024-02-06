@@ -1,0 +1,30 @@
+def liste_programmes_absents(request):
+    programmes_absents = []
+
+    if request.method == 'POST':
+        form = Form_ProgrammeAbsent(request.POST)
+        if form.is_valid():
+            profil_selectionne = form.cleaned_data['profil']
+
+            # Récupérez la liste de tous les programmes
+            tous_les_programmes = Programme.objects.all()
+
+            if profil_selectionne:
+                # Récupérez les programmes liés au profil sélectionné
+                programmes_habilites = Habilitation.objects.filter(profil=profil_selectionne).values_list('programme', flat=True)
+
+                # Obtenez les programmes qui ne sont pas liés au profil
+                programmes_absents = tous_les_programmes.exclude(id__in=programmes_habilites)
+            else:
+                # Si "Tous les profils" est sélectionné, les programmes absents sont simplement tous les programmes
+                programmes_absents = tous_les_programmes
+
+    else:
+        form = Form_ProgrammeAbsent()
+
+    context = {
+        'form': form,
+        'programmes_absents': programmes_absents,
+    }
+
+    return render(request, 'votre_template.html', context)

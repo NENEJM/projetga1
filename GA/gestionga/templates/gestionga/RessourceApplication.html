@@ -1,0 +1,123 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-sm-5 mx-auto"
+        <br>
+        <h4 class="text-center" style="color: #070707;">HABILITER</h4>
+        <div class="custom-form">
+            <form action="" method="POST">
+                <div>
+                    {% csrf_token %}
+                    {{ fm15.as_p }} 
+                </div>
+                <br>
+                <input type="submit" class="btn btn-success" value="Ajouter">
+                <br> <br>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-sm-12">
+        <br>
+        <br>
+        <br>
+        <h4 class="text-center" style="color: #070707;">Liste des habilitations ressources applications</h4>
+        {% if donnees15 %}
+            <table class="table table-success table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Nom</th>
+                        <th scope="col">Prenom</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Matricule</th>
+                        <th scope="col">Application</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donnee in donnees15 %}
+                        <tr>
+                            <th scope="row">{{ donnee.id }}</th>
+                            <td>{{ donnee.ressource.nom }}</td>
+                            <td>{{ donnee.ressource.prenom }}</td>
+                            <td>{{ donnee.ressource.email }}</td>
+                            <td>{{ donnee.ressource.matricule }}</td>
+                            <td>{{ donnee.application.application }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="#" class="btn btn-secondary btn-sm mx-3">Modifier</a>
+                                    <form action="#" method="post" class="d-inline">
+                                        <input type="submit" class="btn btn-danger btn-sm" value="Supprimer">
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <style>
+                /* Ajoutez le CSS personnalisé pour le formulaire de recherche */
+                .custom-form {
+                    background-color: #f9fafb;
+                    padding: 10px;
+                    border: 1px solid rgb(8, 8, 8);
+                    border-radius: 18px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+                }
+
+                .custom-form label {
+                    display: block;
+                    margin-bottom: 4px;
+                    font-weight: bold;
+                    color: #333333;
+                }
+
+                .custom-form input[type="text"],
+                .custom-form select,
+                .custom-form input[type="submit"] {
+                    width: 100%;
+                    padding: 7px;
+                    margin-bottom: 10px;
+                    border: 1px solid #cccccc;
+                    border-radius: 5px;
+                    box-sizing: border-box;
+                    transition: transform 0.3s ease;
+                }
+
+                .custom-form input[type="submit"] {
+                    background-color: #4caf50;
+                    color: #ffffff;
+                    cursor: pointer;
+                }
+
+                .custom-form select:hover {
+                    transform: scale(1.05);
+                }
+            </style>
+
+            <!-- Ajoutez la pagination sous mon tableau -->
+            <div class="pagination">
+                <span class="step-links">
+                    {% if donnees15.has_previous %}
+                        <a href="?page=1" class=" btn btn-warning btn-sm">&laquo; debut</a>
+                        <a href="?page={{ donnees15.previous_page_number }}" class=" btn btn-warning btn-sm">precedent</a>
+                    {% endif %}
+                    <span class="current-page">
+                        Page {{ donnees15.number }} sur {{ donnees15.paginator.num_pages }}.
+                    </span>
+                    {% if donnees15.has_next %}
+                        <a href="?page={{ donnees15.next_page_number }}" class=" btn btn-warning btn-sm">suivant</a>
+                        <a href="?page={{ donnees15.paginator.num_pages }}" class=" btn btn-warning btn-sm">fin &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+            <!-- Fin de la pagination -->
+        {% else %}
+            <h4 class="text-center alert alert alert-warning">Aucune donnée disponible pour le moment</h4>
+        {% endif %}
+    </div>
+</div>
+<br><br>
+{% endblock content %}

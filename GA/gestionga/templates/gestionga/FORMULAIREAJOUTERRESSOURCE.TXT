@@ -1,0 +1,50 @@
+{% extends 'gestionga/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center"> <!-- Utilisez 'justify-content-center' pour centrer -->
+    <div class="col-sm-4">
+        <h4 class="text-center" style="color: #070707;">Enregistrer ressource</h4>
+        <div class="custom-form"> <!-- Ajoutez une classe personnalisée pour styliser le formulaire -->
+            <form action="" method="POST">
+                <div>
+                    {% csrf_token %}
+                    {{ fm7.as_p }}
+                </div>
+            </form> 
+        </div>
+        <br>
+        <input type="submit" class="btn btn-success" value="Ajouter">
+        <a href="{% url 'tableau_ressource' %}" class="btn btn-warning">retour</a>
+    </div>
+    
+</div>
+<style>
+    /* CSS personnalisé pour le formulaire */
+    .custom-form {
+        border: 1px solid rgb(8, 8, 8); /* Ajoutez une bordure grise autour du formulaire */
+        padding: 20px; /* Ajoutez un espace intérieur pour le contenu du formulaire */
+        border-radius: 18px; /* Ajoutez des coins arrondis */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Ajoutez une ombre légère */
+        background-color: #a6f6c6; /* Couleur de fond du formulaire */
+    }
+
+    /* CSS pour aligner les champs du formulaire */
+    .custom-form label {
+        display: inline-block;
+        width: 120px; /* Ajustez la largeur selon vos besoins */
+    }
+</style>
+<br><br>
+{% endblock content %}
+ù
+
+
+
+
+
+
+if search:
+             = .filter(module__icontains=search) | \
+                      .filter(programme__icontains=search) | \
+                      .filter(intitule__icontains=search) | \
+                      .filter(typ__icontains=search)

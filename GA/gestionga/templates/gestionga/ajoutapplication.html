@@ -1,0 +1,97 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+<div class="row"> 
+    <div class="col-sm-4">
+    <br>
+    <br>
+    <br>
+    <h4 class="text-center" style="color: #070707;">Ajouter une application</h4>
+    <div class="custom-form">
+    <form action="" method="POST">
+        <div>
+            {% csrf_token %}
+            {{ fm8.as_p }}
+        </div>
+        <style>
+            /* CSS personnalisé pour le formulaire */
+            .custom-form {
+                border: 1px solid rgb(8, 8, 8); /* Ajoutez une bordure grise autour du formulaire */
+                padding: 20px; /* Ajoutez un espace intérieur pour le contenu du formulaire */
+                border-radius: 18px; /* Ajoutez des coins arrondis */
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Ajoutez une ombre légère */
+                background-color: #f5f7f6; /* Couleur de fond du formulaire */
+            }
+        
+            /* CSS pour aligner les champs du formulaire */
+            .custom-form label {
+                display: inline-block;
+                width: 90px; /* Ajustez la largeur selon vos besoins */
+            }
+        </style>
+        </div>
+      
+        <br>
+        <input type="submit" class="btn btn-success" value="Ajouter">
+    </form> 
+</div>
+<div class="col-sm-8">
+    <br>
+    <br>
+    <br>
+    <h4 class="text-center" style="color: #070707;">liste des applications</h4>
+    {% if donnees8 %}
+    <table class="table table-success table-striped">
+        <thead>      
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Application</th>
+            <th scope="col">Description</th>
+            <th scope="col">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for donnee in donnees8 %}
+            <tr>
+            <th scope="row">{{donnee.id}}</th>
+            <td>{{donnee.application}}</td>
+            <td>{{donnee.description}}</td>
+
+            <td>
+                <div class="btn-group">
+                    <a href="{% url 'UpdateApplication' donnee.id%}" class="btn btn-secondary btn-sm mx-3">Modifier</a> <!-- mx-3 me permet de separer les deux boutons -->
+                    <form action="#" method="post" class="d-inline"> {% csrf_token %}
+                        <input type="submit" class="btn btn-danger btn-sm" value="Supprimer">
+                    </form>
+                </div>
+            </td>
+            
+            
+        </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+        
+        <!-- Ajoutez la pagination sous mon tableau -->
+    <div class="pagination">
+    <span class="step-links">
+        {% if donnees8.has_previous %}
+            <a href="?page=1" class=" btn btn-warning btn-sm">&laquo; debut</a>
+            <a href="?page={{ donnees8.previous_page_number }}" class=" btn btn-warning btn-sm">precedent</a>
+        {% endif %}
+        <span class="current-page">
+            Page {{ donnees8.number }} sur {{ donnees8.paginator.num_pages }}.
+        </span>
+        {% if donnees8.has_next %}
+            <a href="?page={{ donnees8.next_page_number }}" class=" btn btn-warning btn-sm">suivant</a>
+            <a href="?page={{ donnees8.paginator.num_pages }}" class=" btn btn-warning btn-sm">fin &raquo;</a>
+        {% endif %}
+    </span>
+    </div>
+<!-- Fin de la pagination -->
+    {% else %}
+    <h4 class="text-center alert alert alert-warning">Aucune donnée disponible pour le moment</h4>
+    {% endif %}
+</div>
+</div>
+<br><br>
+{% endblock content %}  

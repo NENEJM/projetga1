@@ -1,0 +1,80 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+<br><br>
+<a href="{% url 'AddRessource' %}" class="btn btn-primary">Add ressource</a>
+<br>
+<div class="col-sm-8">
+    <br>
+    <br>
+    <br>
+    <h4 class="text-center" style="color: #070707;">liste ressources</h4>
+    {% if donnees7 %}
+    <table class="table table-success table-striped">
+        <!-- ... -->
+<thead>      
+    <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Nom</th>
+        <th scope="col">Prenom</th>
+        <th scope="col">Email</th>
+        <th scope="col">Numero IP</th>
+        <th scope="col">Departement</th>
+        <th scope="col">Service</th>
+        <th scope="col">Statut</th>
+        <th scope="col">Date debut</th>
+        <th scope="col">Date fin</th>
+        <th scope="col">Action</th> 
+    </tr>
+</thead>
+<tbody>
+    {% for donnee in donnees7 %}
+    <tr>
+        <th scope="row">{{donnee.id}}</th>
+        <td>{{donnee.nom}}</td>
+        <td>{{donnee.prenom}}</td>
+        <td>{{donnee.email}}</td>
+        <td>{{donnee.numero_ip}}</td>
+        <td>{{donnee.departement}}</td>
+        <td>{{donnee.service}}</td>
+        <td>{{donnee.statut}}</td>
+        <td>{{donnee.date_debut}}</td>
+        <td>{{donnee.date_fin}}</td>
+        <td>
+            <div class="btn-group">
+                <a href="#" class="btn btn-secondary btn-sm mx-3">Desactiver</a>
+                <form action="#" method="post" class="d-inline"> {% csrf_token %}
+                    <input type="submit" class="btn btn-danger btn-sm" value="Supprimer">
+                </form>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+<!-- ... -->
+
+        </table>
+        
+        <!-- Ajoutez la pagination sous mon tableau -->
+    <div class="pagination">
+    <span class="step-links">
+        {% if donnees7.has_previous %}
+            <a href="?page=1" class=" btn btn-warning btn-sm">&laquo; debut</a>
+            <a href="?page={{ donnees7.previous_page_number }}" class=" btn btn-warning btn-sm">precedent</a>
+        {% endif %}
+        <span class="current-page">
+            Page {{ donnees7.number }} sur {{ donnees7.paginator.num_pages }}.
+        </span>
+        {% if donnees7.has_next %}
+            <a href="?page={{ donnees7.next_page_number }}" class=" btn btn-warning btn-sm">suivant</a>
+            <a href="?page={{ donnees7.paginator.num_pages }}" class=" btn btn-warning btn-sm">fin &raquo;</a>
+        {% endif %}
+    </span>
+    </div>
+<!-- Fin de la pagination -->
+    {% else %}
+    <h4 class="text-center alert alert alert-warning">Aucune donnée disponible pour le moment</h4>
+    {% endif %}
+</div>
+</div>
+<br>
+{% endblock content %}  

@@ -1,0 +1,89 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+<div class="row"> 
+    <div class="col-sm-4">
+    <br>
+    <br>
+    <br>
+    <h4 class="text-center" style="color: #070707;">Ajouter un Domaine</h4>
+    <div class="form-control">
+    <form action="" method="POST">
+        <div>
+            {% csrf_token %}
+            {{ fm1.as_p }}
+        </div>
+        <style>
+            /* CSS personnalisé pour assombrir les bordures des champs de formulaire */
+            .form-control {
+                border: 1px solid rgb(0, 3, 5); /* Couleur noire pour la bordure */
+                /* Autres styles de bordure personnalisés si nécessaire */
+            }
+        </style>
+        </div>
+        <br>
+        <input type="submit" class="btn btn-success" value="Ajouter">
+        
+    </form> 
+    <br><br><br>
+    <a href="{% url 'MajDonnee' %}" class="btn btn-warning">retour</a> 
+</div>
+<div class="col-sm-8">
+    <br>
+    <br>
+    <br>
+    <h4 class="text-center" style="color: #070707;">liste des Domaines</h4>
+    {% if donnees1 %}
+    <table class="table table-success table-striped">
+        <thead>      
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Domaine</th>
+            <th scope="col">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for donnee in donnees1 %}
+            <tr>
+            <th scope="row">{{donnee.id}}</th>
+            <td>{{donnee.nom_domaine}}</td>
+
+            <td>
+                <div class="btn-group">
+                    <a href="{% url 'updatedomaine' donnee.id%}" class="btn btn-secondary btn-sm mx-3">Modifier</a> <!-- mx-3 me permet de separer les deux boutons -->
+                    <form action="{% url 'deletedomaine' donnee.id %}" method="post" class="d-inline"> {% csrf_token %}
+                        <input type="submit" class="btn btn-danger btn-sm" value="Supprimer">
+                    </form>
+                </div>
+            </td>
+            
+            
+        </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+        
+        <!-- Ajoutez la pagination sous mon tableau -->
+    <div class="pagination">
+    <span class="step-links">
+        {% if donnees1.has_previous %}
+            <a href="?page=1" class=" btn btn-warning btn-sm">&laquo; debut</a>
+            <a href="?page={{ donnees1.previous_page_number }}" class=" btn btn-warning btn-sm">precedent</a>
+        {% endif %}
+        <span class="current-page">
+            Page {{ donnees1.number }} sur {{ donnees1.paginator.num_pages }}.
+        </span>
+        {% if donnees1.has_next %}
+            <a href="?page={{ donnees1.next_page_number }}" class=" btn btn-warning btn-sm">suivant</a>
+            <a href="?page={{ donnees1.paginator.num_pages }}" class=" btn btn-warning btn-sm">fin &raquo;</a>
+        {% endif %}
+    </span>
+    </div>
+<!-- Fin de la pagination -->
+    {% else %}
+    <h4 class="text-center alert alert alert-warning">Aucune donnée disponible pour le moment</h4>
+    {% endif %}
+</div>
+</div>
+<br><br>
+
+{% endblock content %}  

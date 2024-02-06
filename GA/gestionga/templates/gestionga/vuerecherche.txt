@@ -1,0 +1,316 @@
+def faire_rechercheprogramme(request):
+    form6 = Form_rchprogramme()
+    profil = None  # Initialiser les variables en dehors de la condition
+    droit = None
+    programme = None
+    results = Habilitation.objects.all()  # Obtenez tous les résultats par défaut
+
+    if request.method == 'POST':
+        form6 = Form_rchprogramme(request.POST)
+
+        if form6.is_valid():
+            profil = form6.cleaned_data['profil']
+            droit = form6.cleaned_data['droit']
+            programme = form6.cleaned_data['programme']
+
+            if profil:
+                results = results.filter(profil=profil)
+
+            if droit:
+                results = results.filter(droit=droit)
+
+            if programme:
+                results = results.filter(programme=programme)    
+        
+            results = results.values(
+                'id',
+                'profil__nom_profil',
+                'profil__description_profil',
+                'programme__nom_programme',
+                'programme__description_programme',
+                'domaine__nom_domaine',
+                'droit__symbole_droit',
+            )
+
+             # Configurez la pagination
+    paginator = Paginator(results, 10)  # Divisez les résultats en pages de 10 éléments par page
+    page_number = request.GET.get('page')  # Obtenez le numéro de la page à partir de la requête GET
+    page = paginator.get_page(page_number)  # Obtenez la page actuelle
+    # Convertissez les résultats en une liste de dictionnaires
+    results_list = list(results)
+
+    return JsonResponse({'results': list(page)})
+
+    return render(request, 'gestionga/rechercheprogramme.html', {'form6': form6, 'profil': profil, 'droit': droit, 'programme': programme})
+
+
+############### AUTRE FORMAT DE LA VUE DESACTIVER RESSOURCE #####################
+
+from django.forms.models import model_to_dict
+
+def desactiver_ressource(request, id):
+    ressource = get_object_or_404(Ressource, id=id)
+
+    # Créer une entrée dans la table RessourceDesactivee en copiant tous les champs
+    RessourceDesactivee.objects.create(**model_to_dict(ressource, exclude=['id']))
+
+    # Supprimer la ressource de la table Ressource
+    ressource.delete()
+
+    return redirect('tableau_ressource')
+
+
+###################### VUE ACTUELLE DESACTIVATION ################3  
+
+def desactiver_ressource(request, id):
+    ressource = get_object_or_404(Ressource, id=id)
+
+    # Créer une entrée dans la table RessourceDesactivee en utilisant la relation OneToOneField
+    RessourceDesactivee.objects.create(
+        ressource=ressource,
+        date_desactivation=timezone.now(),
+    )
+
+    # Supprimer la ressource de la table Ressource
+    ressource.delete()
+
+    return redirect('tableau_ressource')
+
+
+#################### VUE PDF FPRMULAIRE REPORTLAB ################    
+
+def generer_formulaire_pdf(request):
+    # Crée un nouveau document PDF
+    formulaire_pdf = BytesIO()
+    c = canvas.Canvas(formulaire_pdf, pagesize=letter)
+
+    # Ajouter le logo en haut à gauche
+    logo_path = r'C:\Users\HP\Downloads\SGlogo.png'
+    c.drawImage(logo_path, 10, 660, width=100, height=40)
+
+    # Titre du formulaire
+    c.setFont("Times-Roman", 12)
+    title = "DEMANDE D’HABILITATIONS SUR DELTA BANK"
+    title_width = c.stringWidth(title, "Times-Roman", 12)
+    c.drawString((letter[0]-title_width)/2, 750, title)
+    c.line((letter[0]-title_width)/2 - 10, 745, (letter[0]-title_width)/2 + title_width + 10, 745)
+    c.line((letter[0]-title_width)/2 - 10, 765, (letter[0]-title_width)/2 + title_width + 10, 765)
+
+    # Définition des champs par défaut
+    fields = [
+        ('Nom', ''),
+        ('Prenoms', ''),
+        ('Email', ''),
+        ('Matricule', ''),
+        ('Numero', '..................................'),
+        ('Departement', 'GA/SGABS'),  # Valeur par défaut pour 'Departement'
+        ('Service', ''),
+        ('Fonction', 'Gestionnaire d\'Application'),  # Valeur par défaut pour 'Fonction'
+        ('Manager', ''),
+        ('Date', str(date.today())),  # Valeur par défaut pour 'Date' (aujourd'hui)
+    ]
+
+    y_position = 620
+    for i in range(0, len(fields), 2):
+        c.setFont("Times-Roman", 13)
+        c.drawString(60, y_position, f"{fields[i][0]} : {fields[i][1]} ")
+        if i + 1 < len(fields):
+            c.drawString(350, y_position, f"{fields[i + 1][0]} : {fields[i + 1][1]} ")
+        y_position -= 30
+
+    # Ajouter les champs "Création", "Modification" et "Suppression" avec des cases à cocher
+    creation_x = 60
+    modification_x = 250
+    suppression_x = 450
+    y_position -= 30  # Descendre un peu plus pour aligner les champs et les cases à cocher
+
+    c.setFont("Times-Roman", 12)
+    c.drawString(creation_x, y_position, "Création : ")
+    c.drawString(modification_x, y_position, "Modification : ")
+    c.drawString(suppression_x, y_position, "Suppression : ")
+
+    # Dessiner les cases à cocher
+    checkbox_size = 13
+    c.rect(creation_x + 80, y_position - 3, checkbox_size, checkbox_size, fill=1)
+    c.rect(modification_x + 100, y_position - 3, checkbox_size, checkbox_size, fill=0)
+    c.rect(suppression_x + 80, y_position - 3, checkbox_size, checkbox_size, fill=0)
+
+    # Ajouter le champ "Profil demandé" avec un espace pour écrire du texte
+    profil_demande_x = 60
+    y_position -= 70  # Descendre pour le champ "Profil demandé"
+    c.setFont("Times-Roman", 15)
+
+    # Dessiner un rectangle autour du texte
+    rectangle_width = 200
+    rectangle_height = 50
+    c.rect(profil_demande_x, y_position - 35, rectangle_width, rectangle_height)  
+
+    # Écrire le texte à l'intérieur du rectangle
+    texte_profil_demande = "Profil demandé :        CSMS"
+    c.drawString(profil_demande_x + 5, y_position - 15, texte_profil_demande)
+
+
+    
+
+    
+    # Rectangle noir - Agent à habiliter
+    c.setFillColorRGB(0, 0, 0)  # Noir
+    c.rect(0, 650, 700, 15, fill=True, stroke=False)
+    c.setFillColorRGB(1, 1, 1)  # Blanc
+    c.setFont("Helvetica", 12)
+    text_agent = "AGENT A HABILITER"
+    text_agent_width = c.stringWidth(text_agent, "Helvetica", 9)
+    x_agent_position = (600 - text_agent_width) / 2
+    c.drawString(x_agent_position, 654, text_agent)
+
+    # Rectangle noir - Validation Manager
+    c.setFillColorRGB(0, 0, 0)  # Noir
+    c.rect(0, 260, 700, 15, fill=True, stroke=False)
+    c.setFillColorRGB(1, 1, 1)  # Blanc
+    c.setFont("Helvetica", 12)
+    text_validation_manager = "VALIDATION MANAGER"
+    text_validation_manager_width = c.stringWidth(text_validation_manager, "Helvetica", 9)
+    x_validation_manager_position = (600 - text_validation_manager_width) / 2
+    c.drawString(x_validation_manager_position, 264, text_validation_manager)
+
+    # Tableau SIGNATURE ET MOTIF
+    table_headers = ['Entete 1', 'Entete 2']
+    c.setFont("Times-Roman", 15)
+
+    # Tableau SIGNATURE ET MOTIF
+    table_headers = ['Entete 1', 'Entete 2']
+    c.setFont("Times-Roman", 15)
+
+    # Données du tableau
+    data = [['MOTIF DE LA DEMANDE', 'DATE ET SIGNATURE DU MANAGER'],
+        ['Demende de Creation du compte Amplitude Bank de l\'utilisateur', 'Cette partie est reservée au Manager']]
+    table = Table(data, colWidths=[270, 270], rowHeights=[30, 120])
+
+    # Style du tableau
+    style = TableStyle([('GRID', (0, 0), (-1, -1), 1, colors.black),
+                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),  # Alignement vertical en haut (TOP)
+                    ('WORDWRAP', (0, 0), (-1, -1)), ]) # Retour automatique à la ligne
+
+    table.setStyle(style)
+
+    # Position du tableau
+    table.wrapOn(c, 10, 0)
+    table.drawOn(c, 36, 100)
+
+
+
+    # Pied de page
+    c.setFont("Times-Italic", 8)
+    pied_de_page = "Cette fiche d'habilitation est juste un exemple car les réelles sont confidentielles"
+    c.drawCentredString(300, 15, pied_de_page)
+
+    # Enregistre le fichier PDF
+    c.save()
+
+    # Retourne le fichier PDF en réponse HTTP
+    formulaire_pdf.seek(0)
+    response = HttpResponse(formulaire_pdf.getvalue(), content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="formulaire_enregistrement.pdf"'
+
+    return response
+
+
+
+################ LIEN POUR IMPRESSIN #####################
+
+<a href="{% url 'voir_pdf' %}" target="_blank">Voir le formulaire PDF</a>
+
+def template_view(request):
+    if request.method == 'POST':
+        fm7 =Form_ressource(request.POST)
+        if fm7.is_valid():
+            fm7.save()
+            # Réinitialisez le formulaire pour vider les champs
+            fm7 = Form_ressource()
+            # Redirigez l'utilisateur vers une page de succès ou autre.
+            #return redirect('ajoutprogramme')  
+
+    # Récupérez les données des ressources si le formulaire n'est pas soumis
+    donnees7 = Ressource.objects.all()
+    
+    # Paginer mon tableau USER
+    paginator = Paginator(donnees7, 15)  # 10 éléments par page
+    page_number = request.GET.get('page')  # Récupérer le numéro de page actuel à partir du paramètre de requête 'page'
+    page_num = paginator.get_page(page_number)
+
+    context = {
+        'fm7':Form_ressource,  # Ajoutez le formulaire au contexte pour qu'il soit rendu dans le modèle HTML
+        'donnees7': page_num,
+    }
+
+    return render(request, 'gestionga/HTMLVIDE.html', context)
+
+
+
+###################### VUE RECHERCHE GA ET AJOUT UNIQUEMENT #################3
+
+def recherche_programme_GA(request):
+    form10 = Form_ProgrammeGA()
+    custom_results_list = []
+
+    if request.method == 'POST':
+        form10 = Form_ProgrammeGA(request.POST)
+        if form10.is_valid():
+            table = form10.cleaned_data['table']
+            cmis = form10.cleaned_data['cmis']
+            module = form10.cleaned_data['modules']
+
+            # Définir un dictionnaire pour mapper les noms de table aux classes correspondantes
+            table_mapping = {
+                'Sgci': Sgci,
+                'Sgsn': Sgsn,
+                'Sgbe': Sgbe,
+                'Sgtg': Sgtg,
+                'Sgbf': Sgbf,
+                'Sgcongo': Sgcongo,
+                'Sgcam': Sgcam,
+                'Sgm': Sgm,
+            }
+
+            # Vérifier si la table sélectionnée existe dans le mapping
+            if table in table_mapping:
+                results = table_mapping[table].objects.all()
+
+                # Filtrer par CMIS
+                if cmis:
+                    results = results.filter(cmis=cmis)
+
+                # Filtrer par module
+                if module:
+                    results = results.filter(module=module)
+
+                # Créer la liste des résultats finaux
+                custom_results_list = [
+                    {
+                        'module': getattr(item, 'module', ''),
+                        'programme_filiale': getattr(item, 'programme_filiale', ''),
+                        'intitule': getattr(item, 'intitule', ''),
+                        'cmis': getattr(item, 'cmis', ''),
+                    }
+                    for item in results
+                ]
+
+                # Ajouter les nouveaux résultats sans supprimer les anciens  
+                ResultatRecherche.objects.bulk_create([
+                ResultatRecherche(
+                module=getattr(item, 'module', ''),
+                programme_filiale=getattr(item, 'programme_filiale', ''),
+                intitule=getattr(item, 'intitule', ''),
+                cmis=getattr(item, 'cmis', ''),
+               )  
+               for item in results
+            ])
+
+                return JsonResponse({'custom_results_list': custom_results_list})
+
+    else:
+        form10 = Form_ProgrammeGA()
+
+    return render(request, 'gestionga/rechprogrammega.html', {'form10': form10})
+
+    

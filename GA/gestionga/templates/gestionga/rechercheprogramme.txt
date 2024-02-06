@@ -1,0 +1,440 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+    <a href="{% url 'programmeabsent' %}" class="btn btn-warning" style="margin-left: 977px; ">Programme off</a> <!-- Bouton en haut à gauche -->
+    <div class="row">
+        <div class="col-sm-5 mx-auto">
+            <h4 class="text-center alert alert-info">Rechercher</h4>
+            <div class="custom-form text-center">
+                <form action="" method="POST" id="search-form">
+                    {% csrf_token %}
+                    {{ form6.as_p }}
+                    <input type="submit" class="btn btn-success" value="Valider">
+                </form>
+            </div>
+            <br>
+        </div>
+    </div>
+    <br><br>
+    <div id="results-div" class="hidden"> <!-- Ajoutez une classe CSS pour cacher le tableau au chargement initial -->
+        <table class="table table-success table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Profil</th>
+                    <th>Description Profil</th>
+                    <th>Programme</th>
+                    <th>Description Programme</th>
+                    <th>Domaine</th>
+                    <th>Droit</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <br>
+        <button id="download-btn" class="btn btn-primary">Télécharger en Excel</button>
+    </div>
+
+
+    <style>
+        /* Ajoutez le CSS personnalisé pour le formulaire de recherche */
+        .custom-form {
+            background-color: #ffffff;
+            padding: 10px;
+            border: 1px solid rgb(8, 8, 8);
+            border-radius: 18px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .custom-form label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: bold;
+            color: #333333;
+        }
+
+        .custom-form input[type="text"],
+        .custom-form select,
+        .custom-form input[type="submit"] {
+            width: 100%;
+            padding: 7px;
+            margin-bottom: 10px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            transition: transform 0.3s ease;
+        }
+
+        .custom-form input[type="submit"] {
+            background-color: #4caf50;
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        .custom-form select:hover {
+            transform: scale(1.05);
+        }
+    </style>
+
+
+
+    <!--  SCRIPT JAVASCRIPT POUR LA RECHERCHE ET L'AFFICHAGE DYNAMIQUE DU TABLEAU -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchForm = document.getElementById('search-form');
+            const resultsDiv = document.getElementById('results-div');
+            const downloadBtn = document.getElementById('download-btn'); // Sélectionnez le bouton à l'extérieur de la fonction
+
+            function loadDataAndExport() {
+                // Effectuez la requête AJAX pour obtenir les résultats
+                fetch('/FonctionRechercheProgramme', {
+                    method: 'POST',
+                    body: new FormData(searchForm),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const results = data.results;
+
+                    const resultHTML = results.map(result => {
+                        return `
+                        <tr> 
+                            <th scope="row">${result.id}</th>
+                            <td>${result.profil__nom_profil}</td>
+                            <td>${result.profil__description_profil}</td>
+                            <td>${result.programme__nom_programme}</td> 
+                            <td>${result.programme__description_programme}</td>
+                            <td>${result.domaine__nom_domaine}</td>
+                            <td>${result.droit__symbole_droit}</td>
+                        </tr>
+                        `;
+                    }).join('');
+
+                    // Affichez les résultats dans l'élément resultsDiv
+                    resultsDiv.innerHTML = `
+                        <table class="table table-success table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Profil</th>
+                                    <th>Description Profil</th>
+                                    <th>Programme</th>
+                                    <th>Description Programme</th>
+                                    <th>Domaine</th>
+                                    <th>Droit</th>
+                                </tr>
+                            </thead>
+                            <tbody>${resultHTML}</tbody>
+                        </table>
+                        <button id="download-btn" class="btn btn-primary">Télécharger en Excel</button>
+                    `;
+
+                    // Rendez le tableau visible
+                    resultsDiv.classList.remove('hidden');
+                });
+            }
+
+            // Ajoutez un écouteur de clic au bouton de téléchargement
+            downloadBtn.addEventListener('click', function () {
+                // Effectuez la requête AJAX pour télécharger les résultats au format Excel
+                fetch('/exporter_en_excel', {
+                    method: 'POST',
+                    body: new FormData(searchForm),
+                })
+                .then(response => response.blob())
+                .then(blob => {
+                    // Créez un objet URL pour le blob Excel
+                    const url = window.URL.createObjectURL(new Blob([blob]));
+                    const a = document.createElement('a');
+
+                    // Configurez le lien de téléchargement
+                    a.href = url;
+                    a.download = 'resultats.xlsx';
+                    document.body.appendChild(a);
+
+                    // Déclenchez le téléchargement
+                    a.click();
+
+                    // Nettoyez l'objet URL après le téléchargement
+                    window.URL.revokeObjectURL(url);
+                });
+            });
+
+            // Chargement initial des données
+            loadDataAndExport();
+
+            // Rafraîchissez les données lors de la soumission du formulaire
+            searchForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+                loadDataAndExport();
+            });
+        });
+    </script>
+    <br><br>
+{% endblock content %}
+
+################################# CODE POUR PERSONNALISER MON FICHIER EXCEL #################
+
+from openpyxl import Workbook
+from openpyxl.styles import Alignment
+from openpyxl.utils import get_column_letter
+from django.http import HttpResponse
+
+def exporter_en_excel(request):
+    form6 = Form_rchprogramme()
+    profil = None
+    droit = None
+    programme = None
+    results = Habilitation.objects.all()
+
+    if request.method == 'POST': 
+        form6 = Form_rchprogramme(request.POST)
+
+        if form6.is_valid():
+            profil = form6.cleaned_data['profil']
+            droit = form6.cleaned_data['droit']
+            programme = form6.cleaned_data['programme']
+
+            if profil:
+                results = results.filter(profil=profil)
+
+            if droit:
+                results = results.filter(droit=droit)
+
+            if programme:
+                results = results.filter(programme=programme)    
+        
+            results = results.values(
+                'id',
+                'profil__nom_profil',
+                'profil__description_profil',
+                'programme__nom_programme',
+                'programme__description_programme',
+                'domaine__nom_domaine',
+                'droit__symbole_droit',
+            )
+
+    # Créer un classeur Excel et ajouter une feuille de calcul
+    wb = Workbook()
+    ws = wb.active
+
+    # Ajouter les en-têtes
+    headers = [
+        'ID',
+        'Profil',
+        'Nom du Programme',
+        'Description du Programme',
+        'Nom du Domaine',
+        'Symbole du Droit',
+    ]
+    ws.append(headers)
+
+    # Ajouter les données
+    for result in results:
+        # Créer une liste pour chaque ligne de données
+        row = [
+            result['id'],
+            f"{result['profil__nom_profil']} - {result['profil__description_profil']}",
+            result['programme__nom_programme'],
+            result['programme__description_programme'],
+            result['domaine__nom_domaine'],
+            result['droit__symbole_droit'],
+        ]
+        ws.append(row)
+
+    # Fusionner les cellules pour 'Profil'
+    ws.merge_cells(start_row=1, start_column=2, end_row=1, end_column=len(headers) + 1)
+
+    # Centrer le texte dans la cellule fusionnée
+    for col_num in range(1, len(headers) + 1):
+        cell = ws.cell(row=1, column=col_num)
+        cell.alignment = Alignment(horizontal='center')
+
+    # Ajuster la largeur des colonnes
+    for col_num, col_letter in enumerate(get_column_letter(col) for col in range(1, len(headers) + 1), start=1):
+        ws.column_dimensions[col_letter].width = 15  # Ajustez la largeur selon vos besoins
+
+    # ... (votre code actuel)
+
+    # Créer une réponse HTTP avec le contenu du classeur Excel
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=resultats.xlsx'
+    wb.save(response)
+
+    return response
+return render(request, 'gestionga/rechercheprogramme.html', {'form6': form6, 'profil': profil, 'droit': droit, 'programme': programme})
+
+
+
+################### CODE ACTUELLE POUR EXTRACTION EXCEL #############################
+
+
+def exporter_en_excel(request):
+
+    form6 = Form_rchprogramme()
+    profil = None
+    droit = None
+    programme = None
+    results = Habilitation.objects.all()
+
+    if request.method == 'POST': 
+        form6 = Form_rchprogramme(request.POST)
+
+        if form6.is_valid():
+            profil = form6.cleaned_data['profil']
+            droit = form6.cleaned_data['droit']
+            programme = form6.cleaned_data['programme']
+
+            if profil:
+                results = results.filter(profil=profil)
+
+            if droit:
+                results = results.filter(droit=droit)
+
+            if programme:
+                results = results.filter(programme=programme)    
+        
+            results = results.values(
+                'id',
+                'profil__nom_profil',
+                'profil__description_profil',
+                'programme__nom_programme',
+                'programme__description_programme',
+                'domaine__nom_domaine',
+                'droit__symbole_droit',
+            )
+
+            # Créer un classeur Excel et ajouter une feuille de calcul
+            wb = Workbook()
+            ws = wb.active
+
+            # Ajouter les en-têtes
+            headers = [
+                'ID',
+                'Nom du Profil',
+                'Description du Profil',
+                'Nom du Programme',
+                'Description du Programme',
+                'Nom du Domaine',
+                'Symbole du Droit',
+            ]
+            ws.append(headers)
+
+            # Ajouter les données
+            for result in results:
+                row = [
+                    result['id'],
+                    result['profil__nom_profil'],
+                    result['profil__description_profil'],
+                    result['programme__nom_programme'],
+                    result['programme__description_programme'],
+                    result['domaine__nom_domaine'],
+                    result['droit__symbole_droit'],
+                ]
+                ws.append(row)
+
+            # Créer une réponse HTTP avec le contenu du classeur Excel
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename=resultats.xlsx'
+            wb.save(response)
+
+            return response
+
+    return render(request, 'gestionga/rechercheprogramme.html', {'form6': form6, 'profil': profil, 'droit': droit, 'programme': programme})
+
+
+
+
+#################################################################################
+
+from openpyxl import Workbook
+from openpyxl.styles import Border, Side
+
+def exporter_en_excel(request):
+   form6 = Form_rchprogramme()
+    profil = None
+    droit = None
+    programme = None
+    results = Habilitation.objects.all()
+
+    if request.method == 'POST': 
+        form6 = Form_rchprogramme(request.POST)
+
+        if form6.is_valid():
+            profil = form6.cleaned_data['profil']
+            droit = form6.cleaned_data['droit']
+            programme = form6.cleaned_data['programme']
+
+            if profil:
+                results = results.filter(profil=profil)
+
+            if droit:
+                results = results.filter(droit=droit)
+
+            if programme:
+                results = results.filter(programme=programme)    
+        
+            results = results.values(
+                'id',
+                'profil__nom_profil',
+                'profil__description_profil',
+                'programme__nom_programme',
+                'programme__description_programme',
+                'domaine__nom_domaine',
+                'droit__symbole_droit',
+            )
+
+
+    # Créer un classeur Excel et ajouter une feuille de calcul
+    wb = Workbook()
+    ws = wb.active
+
+    # Ajouter les en-têtes
+    headers = [
+        'ID',
+        'Profil',
+        'Description Profil',
+        'Programme',
+        'Description Programme',
+        'Domaine',
+        'Droit',
+    ]
+    ws.append(headers)
+
+    # Ajouter les données
+    for result in results:
+        row = [
+            result['id'],
+            result['profil__nom_profil'],
+            result['profil__description_profil'],
+            result['programme__nom_programme'],
+            result['programme__description_programme'],
+            result['domaine__nom_domaine'],
+            result['droit__symbole_droit'],
+        ]
+        ws.append(row)
+
+    # Ajouter des bordures aux cellules
+    thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+
+    for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=1, max_col=ws.max_column):
+        for cell in row:
+            cell.border = thin_border
+
+    # Ajuster la largeur des colonnes en fonction du contenu
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter  # Get the column name
+        for cell in col:
+            try:  # Necessary to avoid error on empty cells
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column].width = adjusted_width
+
+    # Créer une réponse HTTP avec le contenu du classeur Excel
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=resultats.xlsx'
+    wb.save(response)
+
+    return response

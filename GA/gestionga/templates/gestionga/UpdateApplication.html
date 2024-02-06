@@ -1,0 +1,21 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+<br>
+<br>
+<div class="row">
+  <div class="col-sm-8 offset-2">    
+    <h4 class="text-center alert alert-info"> Modifier l'application </h4> 
+    <div class="form-control">
+      <form action="" method="post">
+          {% csrf_token %}
+          {{ fm8.as_p }}
+    </div>
+     <br>
+     
+        <input type="submit" class="btn btn-success" value="Modifier" style="margin-right: 15px;">
+        <a href="{% url 'ajoutapplication' %}" class="btn btn-warning">retour</a>
+      </form>
+  </div>
+</div>
+{% endblock content %}
+

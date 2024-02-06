@@ -1,0 +1,69 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+<div class="row"> 
+    <div class="col-sm-4">
+    <br>
+    <br>
+    <br>
+    <h4 class="text-center" style="color: #070707;">Ajouter un Profil</h4>
+    <div class="form-control">
+    <form action="" method="POST">
+        <div>
+            {% csrf_token %}
+            {{ fm3.as_p }}
+        </div>
+        <style>
+            /* CSS personnalisé pour assombrir les bordures des champs de formulaire */
+            .form-control {
+                border: 1px solid rgb(0, 3, 5); /* Couleur noire pour la bordure */
+                /* Autres styles de bordure personnalisés si nécessaire */
+            }
+        </style>
+        </div>
+        <br>
+        <input type="submit" class="btn btn-success" value="Ajouter">
+    </form> 
+    <br><br><br>
+    <a href="{% url 'MajDonnee' %}" class="btn btn-warning">retour</a> 
+</div>
+<div class="col-sm-8">
+    <br>
+    <br>
+    <br>
+    <h4 class="text-center" style="color: #070707;">liste des profils</h4>
+    {% if donnees3 %}
+    <table class="table table-success table-striped">
+        <thead>      
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Nom Profil</th>
+            <th scope="col">Description Profil</th>
+            <th scope="col">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for donnee in donnees3 %}
+            <tr>
+                <th scope="row">{{ donnee.id }}</th>
+                <td>{{ donnee.nom_profil }}</td>
+                <td>{{ donnee.description_profil }}</td>
+                <td>
+                    <div class="btn-group">
+                        <a href="{% url 'updateprofil' donnee.id %}" class="btn btn-secondary btn-sm mx-3">Modifier</a>
+                        <form action="{% url 'deleteprofil' donnee.id %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="submit" class="btn btn-danger btn-sm" value="Supprimer">
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <h4 class="text-center alert alert alert-warning">Aucune donnée disponible pour le moment</h4>
+    {% endif %}
+</div>
+</div>
+<br><br>
+{% endblock content %}

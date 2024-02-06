@@ -1,0 +1,98 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+    <br>
+    <br>
+    <div class="row">
+        <div class="col-sm-5 mx-auto">
+            <h4 class="text-center alert alert-info">Rechercher programmes absents</h4>
+            <div class="form-control text-center">
+                <form action="" method="POST" id="search-form">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <input type="submit" class="btn btn-success" value="Valider">
+                </form>
+            </div>
+            <br>
+        </div>
+    </div>
+    <br><br>
+    <div id="results-div"> <!-- Ajoutez un div pour afficher les résultats -->
+        <!-- Ajoutez le paragraphe pour afficher le nombre d'éléments -->
+        <p id="result-count" class="text-center"></p>
+        <br>
+        <table class="table table-success table-striped" style="display: none;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Programme</th>
+                    <th>Description Programme</th>
+                    <th>Domaine</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!--  DEBUT SCRIPT JAVASCRIPT POUR LA RECHERCHE ET L'AFFICHAGE DYNAMIQUE DU TABLEAU -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchForm = document.getElementById('search-form');
+            const resultsDiv = document.getElementById('results-div');
+            const resultCount = document.getElementById('result-count'); // Ajout de l'élément pour afficher le nombre
+
+            searchForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                // Effectuez la requête AJAX pour obtenir les résultats
+                fetch('/FonctionProgrammeAbsent', {
+                    method: 'POST',
+                    body: new FormData(searchForm),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const results = data.results;
+
+                    if (results.length > 0) {
+                        // Affichez le nombre d'éléments
+                        resultCount.textContent = ` ${results.length} PROGRAMMES`;
+
+                        // Créez une chaîne HTML pour afficher les résultats
+                        const resultHTML = results.map(result => {
+                            return `
+                            <tr> 
+                                <th scope="row">${result.id}</th>
+                                <td>${result.nom_programme}</td> 
+                                <td>${result.description_programme}</td>
+                                <td>${result.domaine_programme__nom_domaine}</td>
+                            </tr>
+                            `;
+                        }).join('');
+
+                        // Affichez les résultats dans l'élément resultsDiv
+                        resultsDiv.innerHTML = `
+                            <table class="table table-success table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Programme</th>
+                                        <th>Description Programme</th>
+                                        <th>Domaine</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${resultHTML}</tbody>
+                            </table>
+                        `;
+                    } else {
+                        // Aucun résultat trouvé, affichez un message
+                        resultCount.textContent = ''; // Masquez le nombre d'éléments s'il n'y a pas de résultats
+                        resultsDiv.innerHTML = `
+                            <h1 style="color: #ff0000;">Aucun résultat trouvé.</h1>
+                        `;
+                    }
+                });
+            });
+        });
+    </script>
+    <br><br><br>
+
+{% endblock content %}

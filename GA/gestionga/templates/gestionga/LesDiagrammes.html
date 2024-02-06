@@ -1,0 +1,23 @@
+{% extends 'gestionga/base.html' %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="mb-5">
+            <h4 class="text-center" style="color: #070707;">Répartition des Droits par Programmes Filiale du PROFIL GA</h4>
+            <br>
+            <div class="mb-5">
+                {{ chart_html_model|safe }}
+            </div>
+        </div>
+        <div class="mb-5">
+            
+            <h4 class="text-center" style="color: #070707;">Répartition des Droits par Programmes des Profils CES</h4>
+            <br>
+            {% for profil in profils %}
+                <div class="mb-5">
+                    {{ chart_html_metier|safe }}
+                </div>
+            {% endfor %}
+        </div> 
+    </div>
+{% endblock content %}

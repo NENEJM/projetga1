@@ -1,0 +1,51 @@
+def recherche_programme_GA(request):
+    form10 = Form_ProgrammeGA()
+    custom_results_list = []
+
+    if request.method == 'POST':
+        form10 = Form_ProgrammeGA(request.POST)
+        if form10.is_valid():
+            table = form10.cleaned_data['table']
+            cmis = form10.cleaned_data['cmis']
+            module = form10.cleaned_data['modules']
+
+            # Définir un dictionnaire pour mapper les noms de table aux classes correspondantes
+            table_mapping = {
+                'Sgci': Sgci,
+                'Sgsn': Sgsn,
+                'Sgbe': Sgbe,
+                'Sgtg': Sgtg,
+                'Sgbf': Sgbf,
+                'Sgcongo': Sgcongo,
+                'Sgcam': Sgcam,
+                'Sgm': Sgm,
+            }
+
+            # Vérifier si la table sélectionnée existe dans le mapping
+            if table in table_mapping:
+                results = table_mapping[table].objects.all()
+
+                # Filtrer par CMIS
+                if cmis:
+                    results = results.filter(cmis=cmis) 
+
+                # Filtrer par module
+                if module:
+                    results = results.filter(module=module)
+
+                # Créer la liste des résultats finaux
+                custom_results_list = [
+                    {
+                        'module': getattr(item, 'module', ''),
+                        'programme_filiale': getattr(item, 'programme_filiale', ''),
+                        'intitule': getattr(item, 'intitule', ''),  # Assurez-vous que intitule existe dans votre modèle
+                        'cmis': getattr(item, 'cmis', ''),  # Assurez-vous que cmis existe dans votre modèle
+                    }
+                    for item in results
+                ]
+
+                return JsonResponse({'custom_results_list': custom_results_list})
+    else:
+        form10 = Form_ProgrammeGA()
+
+    return render(request, 'gestionga/rechprogrammega.html', {'form10': form10})

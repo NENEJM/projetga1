@@ -1,0 +1,152 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+    <div class="row">
+        <div class="col-sm-5 mx-auto">
+            <h4 class="text-center alert alert-info">Rechercher Application/ressource</h4>
+            <div class="custom-form text-center">
+                <form action="" method="POST" id="search-form">
+                    {% csrf_token %}
+                    {{ form16.as_p }}
+                    <input type="submit" class="btn btn-success" value="Valider"> 
+                </form>
+            </div>
+            <br>
+        </div>
+    </div>
+    <br><br>
+    <div id="results-div" class="hidden"> <!-- Ajoutez une classe CSS pour cacher le tableau au chargement initial -->
+        <p id="result-count" class="text-center"></p>
+
+        <table class="table table-success table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Prenom</th>
+                    <th>Email</th>
+                    <th>Matricule</th>
+                    <th>Application</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <br>
+         <!-- <button id="download-btn" class="btn btn-primary">Télécharger en Excel</button> -->
+    </div>
+
+
+    <style>
+        /* Ajoutez le CSS personnalisé pour le formulaire de recherche */
+        .custom-form {
+            background-color: #ffffff;
+            padding: 10px;
+            border: 1px solid rgb(8, 8, 8);
+            border-radius: 18px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .custom-form label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: bold;
+            color: #333333;
+        }
+
+        .custom-form input[type="text"],
+        .custom-form select,
+        .custom-form input[type="submit"] {
+            width: 100%;
+            padding: 7px;
+            margin-bottom: 10px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            transition: transform 0.3s ease;
+        }
+
+        .custom-form input[type="submit"] {
+            background-color: #4caf50;
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        .custom-form select:hover {
+            transform: scale(1.05);
+        }
+
+        #result-count {
+        font-weight: bold;
+        font-size: 1.2em;  
+    }
+    </style>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchForm = document.getElementById('search-form');
+        const resultsTableBody = document.querySelector('#results-div table tbody');
+        const downloadBtn = document.getElementById('download-btn');
+        const resultCountParagraph = document.getElementById('result-count');
+
+        searchForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            // Effectuez la requête AJAX pour obtenir les résultats
+            fetch('/fonctionrechressapp', {
+                method: 'POST',
+                body: new FormData(searchForm),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const results = data.results;
+
+                // Affichez le nombre de résultats dans le paragraphe
+                resultCountParagraph.textContent = `Nombre de résultats : ${results.length}`;
+
+                // Remplissez le tableau avec les résultats
+                resultsTableBody.innerHTML = ''; // Effacez le contenu actuel du tableau
+                results.forEach(result => {
+                    const row = document.createElement('tr');
+                    Object.values(result).forEach(value => {
+                        const cell = document.createElement('td');
+                        cell.textContent = value;
+                        row.appendChild(cell);
+                    });
+                    resultsTableBody.appendChild(row);
+                });
+
+                // Affichez le tableau
+                document.getElementById('results-div').classList.remove('hidden');
+
+                // Affichez le bouton de téléchargement
+                downloadBtn.style.display = 'block';
+            });
+        });
+
+        // Ajoutez un écouteur de clic pour le bouton de téléchargement
+        downloadBtn.addEventListener('click', function () {
+            // Effectuez la requête AJAX pour télécharger les résultats au format Excel
+            fetch('/RessAppExtraction', {
+                method: 'POST',
+                body: new FormData(searchForm),
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(new Blob([blob]));
+                const a = document.createElement('a');
+
+                a.href = url;
+                a.download = 'resultats.xlsx';
+                document.body.appendChild(a);
+
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+        });
+    });
+</script>
+
+    
+    <br><br>
+{% endblock content %}

@@ -1,0 +1,9 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+<h4 class="text-center" style="color: #070707;">Répartition des Droits par Programmes Filiale du PROFIL GA</h4>
+    <div class="container mt-5">
+        <div class="mb-5">
+            {{ chart_html_model|safe }}
+        </div>
+    </div>
+{% endblock content %}

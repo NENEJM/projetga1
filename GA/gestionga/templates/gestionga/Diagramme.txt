@@ -1,0 +1,271 @@
+from django.shortcuts import render
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+
+def example_diagramme(request):
+    # Les données pour le premier diagramme (Année 2022)
+    labels1 = ['Janvier', 'Février', 'Mars']
+    values1 = [15, 35, 50]
+
+    # Les données pour le deuxième diagramme (Année 2023)
+    labels2 = ['Janvier', 'Février', 'Mars']
+    values2 = [20, 0, 80]
+
+    # Couleurs personnalisées pour chaque tranche
+    marker_colors1 = ['#FF9999', '#66B2FF', '#99FF99']
+    marker_colors2 = ['#FFCC99', '#C2C2F0', '#FFD700']
+
+    # Créer le sous-diagramme avec 1 ligne et 2 colonnes
+    fig = make_subplots(1, 2, specs=[[{'type':'pie'}, {'type':'pie'}]])
+
+    # Ajouter le premier trace du diagramme (Année 2022) avec des couleurs personnalisées
+    fig.add_trace(go.Pie(labels=labels1, values=values1, textinfo='label+percent', marker=dict(colors=marker_colors1)), 1, 1)
+
+    # Ajouter le deuxième trace du diagramme (Année 2023) avec des couleurs personnalisées
+    fig.add_trace(go.Pie(labels=labels2, values=values2, textinfo='label+percent', marker=dict(colors=marker_colors2)), 1, 2)
+
+    # Mettre à jour la mise en page du diagramme avec une taille personnalisée (augmentation de 5%)
+    fig.update_layout(
+        title_text='Pourcentage des différents Mois',
+        showlegend=False,  # Désactive la légende des couleurs
+        height=1.05 * 500,  # Augmente la hauteur de 5%
+        width=1.05 * 800   # Augmente la largeur de 5%
+    )
+
+    # Ajouter les annotations pour les années avec un léger déplacement vers le bas
+    fig.update_layout(
+        annotations=[
+            dict(text='Année 2022', x=0.24, y=-0.16, font=dict(size=16, color='black')),
+            dict(text='Année 2023', x=0.8, y=-0.16, font=dict(size=16, color='black')),
+        ]
+    )
+
+    # Convertir le diagramme en HTML
+    chart_html = fig.to_html(full_html=False)
+
+    # Passer le HTML du diagramme à la template
+    context = {'chart_html': chart_html}
+    return render(request, 'gestionga/Diagramme.html', context)
+
+
+
+POUR MODIFIER LA TAILLE DES DIAGRAMMES
+
+
+######################## DISPOSITION 1 ########################################
+
+from django.shortcuts import render
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+
+def example_diagramme(request):
+    # Les données pour le premier diagramme (Année 2020)
+    labels1 = ['Janvier', 'Février', 'Mars']
+    values1 = [10, 25, 65]
+
+    # Les données pour le deuxième diagramme (Année 2021)
+    labels2 = ['Janvier', 'Février', 'Mars']
+    values2 = [25, 45, 30]
+
+    # Les données pour le troisième diagramme (Année 2022)
+    labels3 = ['Janvier', 'Février', 'Mars']
+    values3 = [15, 35, 50]
+
+    # Les données pour le quatrième diagramme (Année 2023)
+    labels4 = ['Janvier', 'Février', 'Mars']
+    values4 = [20, 0, 80]
+
+    # Couleurs personnalisées pour chaque tranche
+    marker_colors1 = ['#FF9999', '#66B2FF', '#99FF99']
+    marker_colors2 = ['#FFCC99', '#C2C2F0', '#FFD700']
+    marker_colors3 = ['#FFD700', '#FF6347', '#7B68EE']
+    marker_colors4 = ['#87CEEB', '#FFD700', '#32CD32']
+
+    # Créer le sous-diagramme avec 2 lignes et 2 colonnes
+    fig = make_subplots(2, 2, specs=[[{'type':'pie'}, {'type':'pie'}], [{'type':'pie'}, {'type':'pie'}]])
+
+    # Ajouter le premier trace du diagramme (Année 2020) avec des couleurs personnalisées
+    fig.add_trace(go.Pie(labels=labels1, values=values1, textinfo='label+percent', marker=dict(colors=marker_colors1)), 1, 1)
+
+    # Ajouter le deuxième trace du diagramme (Année 2021) avec des couleurs personnalisées
+    fig.add_trace(go.Pie(labels=labels2, values=values2, textinfo='label+percent', marker=dict(colors=marker_colors2)), 1, 2)
+
+    # Ajouter le troisième trace du diagramme (Année 2022) avec des couleurs personnalisées
+    fig.add_trace(go.Pie(labels=labels3, values=values3, textinfo='label+percent', marker=dict(colors=marker_colors3)), 2, 1)
+
+    # Ajouter le quatrième trace du diagramme (Année 2023) avec des couleurs personnalisées
+    fig.add_trace(go.Pie(labels=labels4, values=values4, textinfo='label+percent', marker=dict(colors=marker_colors4)), 2, 2)
+
+    # Mettre à jour la mise en page du diagramme
+    fig.update_layout(title_text='Pourcentage des différents Mois pour chaque Année',
+                      showlegend=False,  # Désactive la légende des couleurs
+                      height=630,  # Ajuste la hauteur du cadre (background)
+                      width=800,  # Ajuste la largeur du cadre (background)
+                      # Ajuste la distance entre les diagrammes horizontalement
+                      xaxis=dict(domain=[0, 0.4]),
+                      xaxis2=dict(domain=[0.6, 1.0])
+
+    )
+
+    # Augmenter la taille des diagrammes de 30%
+    fig.update_layout(
+        autosize=False,
+        margin=dict(l=20, r=20, t=50, b=20),  # Ajuster les marges pour le texte et les axes
+        height=1.2 * fig.layout.height  # Augmenter la hauteur des diagrammes de ?%
+    )
+
+    # Ajouter les annotations pour les années avec un léger déplacement vers le bas
+    fig.update_layout(
+        annotations=[
+            dict(text='Année 2020', x=0.2, y=-1, font=dict(size=16, color='black')),
+            dict(text='Année 2021', x=0.8, y=-0.25, font=dict(size=16, color='black')),
+            dict(text='Année 2022', x=0.2, y=-0.75, font=dict(size=16, color='black')),
+            dict(text='Année 2023', x=0.8, y=-0.75, font=dict(size=16, color='black')),
+        ]
+    )
+
+    # Convertir le diagramme en HTML
+    chart_html = fig.to_html(full_html=False)
+
+    # Passer le HTML du diagramme à la template
+    context = {'chart_html': chart_html}
+    return render(request, 'gestionga/Diagramme.html', context)
+
+
+################# MES DIAGRAMMES ###########################################
+
+################### DIAGRAMME PROGRAMME METIER ######################################
+
+from django.shortcuts import render
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+from django.db import models
+from .models import Habilitation, Profil, Programme, Droit
+
+def DiagramMetier(request):
+    # Liste des profils
+    profils = Profil.objects.all()
+
+    # Créer le sous-diagramme avec 1 ligne et len(profils) colonnes
+    fig = make_subplots(1, len(profils), specs=[[{'type': 'pie'}] * len(profils)], subplot_titles=[profil.nom_profil for profil in profils])
+
+    for i, profil in enumerate(profils, start=1):
+        # Récupérer les habilitations pour le profil actuel
+        habilitations = Habilitation.objects.filter(profil=profil)
+
+        # Compter le nombre de droits pour chaque type
+        droits_count = habilitations.values('droit__symbole_droit').annotate(count=models.Count('droit__symbole_droit'))
+
+        # Labels et valeurs pour le diagramme
+        labels = [entry['droit__symbole_droit'] for entry in droits_count]
+        values = [entry['count'] for entry in droits_count]
+
+        # Ajouter le trace du diagramme pour le profil actuel
+        fig.add_trace(go.Pie(labels=labels, values=values, textinfo='label+percent'), 1, i)
+
+    # Mettre à jour la mise en page du diagramme
+    fig.update_layout(title_text='Répartition des droits par programmes des Profils Metier',
+                      showlegend=True,
+                      height=1.12 * 500,  # Ajuster la hauteur du cadre (background)
+                      width=1.12 * 1200  # Ajuster la largeur du cadre (background)
+                      )
+
+    # Convertir le diagramme en HTML
+    chart_html = fig.to_html(full_html=False)
+
+    # Passer le HTML du diagramme à la template
+    context = {'chart_html': chart_html, 'profils': profils}
+    return render(request, 'gestionga/StatProgramMetier.html', context)
+
+
+
+########################### DIAGRAMME PROGRAMME FILIALE ########################
+
+from django.shortcuts import render
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+from django.db import models
+from .models import Sgci, Sgsn, Sgbe, Sgtg, Sgbf, Sgcongo, Sgcam, Sgm
+
+def DiagramFiliale(request):
+    # Liste des modèles de programmes
+    program_models = [Sgci, Sgsn, Sgbe, Sgtg, Sgbf, Sgcongo, Sgcam, Sgm]
+
+    # Diviser les modèles en deux groupes
+    half_len = len(program_models) // 2
+    first_group = program_models[:half_len]
+    second_group = program_models[half_len:]
+
+    # Créer le sous-diagramme avec 2 lignes et chaque ligne a la moitié des modèles
+    fig = make_subplots(2, half_len, specs=[[{'type': 'pie'}] * half_len] * 2, 
+                        subplot_titles=[model.__name__ for model in program_models])
+
+    chart_html_models = []  # Liste pour stocker les HTML de chaque modèle
+
+    for i, program_model in enumerate(first_group, start=1):
+        # Récupérer les données du modèle de programme actuel
+        data = program_model.objects.values('cmis').annotate(count=models.Count('cmis'))
+
+        # Labels et valeurs pour le diagramme
+        labels = [entry['cmis'] for entry in data]
+        values = [entry['count'] for entry in data]
+
+        # Ajouter le trace du diagramme pour le modèle de programme actuel
+        fig.add_trace(go.Pie(labels=labels, values=values, textinfo='label+percent'), 1, i)
+
+    for i, program_model in enumerate(second_group, start=1):
+        # Récupérer les données du modèle de programme actuel
+        data = program_model.objects.values('cmis').annotate(count=models.Count('cmis'))
+
+        # Labels et valeurs pour le diagramme
+        labels = [entry['cmis'] for entry in data]
+        values = [entry['count'] for entry in data]
+
+        # Ajouter le trace du diagramme pour le modèle de programme actuel
+        fig.add_trace(go.Pie(labels=labels, values=values, textinfo='label+percent'), 2, i)
+
+    # Mettre à jour la mise en page du diagramme
+    fig.update_layout(title_text='Répartition des cmis par programme_filiale',
+                      showlegend=True,
+                      height=800,  # Ajuster la hauteur du cadre (background)
+                      width=1200  # Ajuster la largeur du cadre (background)
+                      )
+
+    # Convertir le diagramme en HTML
+    chart_html_model = fig.to_html(full_html=False)
+
+    # Passer la liste de HTML des diagrammes à la template
+    context = {'chart_html_model': chart_html_model, 'program_models': program_models}
+    return render(request, 'gestionga/diagramme_filiale.html', context)
+
+#####################33 LES HTML ###############################################
+
+template METIER :
+
+{% extends 'gestionga/base.html' %}
+
+{% block content %}
+    <div class="container mt-5">
+        {% for profil in profils %}
+            <div class="mb-5">
+                {{ chart_html|safe }}
+            </div>
+        {% endfor %}
+    </div>
+    <br>
+{% endblock content %}
+
+
+template GA 
+
+{% extends 'gestionga/base.html' %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="mb-5">
+            {{ chart_html_model|safe }}
+        </div>
+    </div>
+{% endblock content %}
+
+

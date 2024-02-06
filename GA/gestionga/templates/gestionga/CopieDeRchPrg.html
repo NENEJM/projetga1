@@ -1,0 +1,50 @@
+<script> 
+document.addEventListener('DOMContentLoaded', function () {
+    const searchForm = document.getElementById('search-form');
+    const resultsDiv = document.getElementById('results-div');
+
+    function loadDataAndExport() {
+        const downloadBtn = document.getElementById('download-btn'); // Sélectionnez le bouton à l'intérieur de la fonction
+
+        // ... (le reste du code)
+
+        // Ajoutez un écouteur de clic au bouton de téléchargement
+        downloadBtn.addEventListener('click', function () {
+            // Effectuez la requête AJAX pour télécharger les résultats au format Excel
+            fetch('/exporter_en_excel', {
+                method: 'POST',
+                body: new FormData(searchForm),
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                // Créez un objet URL pour le blob Excel
+                const url = window.URL.createObjectURL(new Blob([blob]));
+                const a = document.createElement('a');
+
+                // Configurez le lien de téléchargement
+                a.href = url;
+                a.download = 'resultats.xlsx';
+                document.body.appendChild(a);
+
+                // Déclenchez le téléchargement
+                a.click();
+
+                // Nettoyez l'objet URL après le téléchargement
+                window.URL.revokeObjectURL(url);
+            });
+        });
+    }
+
+    // Chargement initial des données
+    loadDataAndExport();
+
+    // Rafraîchissez les données lors de la soumission du formulaire
+    searchForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        loadDataAndExport();
+    });
+});
+
+
+</script>
+

@@ -1,0 +1,59 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+<div class="row"> 
+    <div class="col-sm-4">
+    <br>
+    <br>
+    <br>
+    <h4 class="text-center" style="color: #070707;">Ajouter un Droit</h4>
+    <div class="form-control">
+    <form action="" method="POST">
+        <div>
+            {% csrf_token %}
+            {{ fm4.as_p }}
+        </div>
+        <style>
+            /* CSS personnalisé pour assombrir les bordures des champs de formulaire */
+            .form-control {
+                border: 1px solid rgb(0, 3, 5); /* Couleur noire pour la bordure */
+                /* Autres styles de bordure personnalisés si nécessaire */
+            }
+        </style>
+        </div>
+        <br>
+        <input type="submit" class="btn btn-success" value="Ajouter">
+    </form> 
+    <br><br><br>
+    <a href="{% url 'MajDonnee' %}" class="btn btn-warning">retour</a> 
+</div>
+<div class="col-sm-8">
+    <br>
+    <br>
+    <br>
+    <h4 class="text-center" style="color: #070707;">liste des droit</h4>
+    {% if donnees4 %}
+    <table class="table table-success table-striped">
+        <thead>      
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Libelle</th>
+            <th scope="col">Description</th>
+            
+        </tr>
+        </thead>
+        <tbody>
+            {% for donnee in donnees4 %}
+            <tr>
+                <th scope="row">{{ donnee.id }}</th>
+                <td>{{ donnee.libelle_droit }}</td>
+                <td>{{ donnee.symbole_droit }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <h4 class="text-center alert alert alert-warning">Aucune donnée disponible pour le moment</h4>
+    {% endif %}
+</div>
+</div>
+{% endblock content %}

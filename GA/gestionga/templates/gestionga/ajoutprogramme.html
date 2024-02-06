@@ -1,0 +1,130 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+<div class="row"> 
+    <div class="col-sm-4">
+    <br>
+    <br>
+    <br>
+    <h4 class="text-center" style="color: #070707;">Ajouter un Programme</h4>
+    <div class="custom-form">
+    <form action="" method="POST">
+        <div>
+            {% csrf_token %}
+            {{ fm2.as_p }}
+        </div>
+        <style>
+            /* Ajoutez le CSS personnalisé pour le formulaire de recherche */
+            .custom-form {
+                background-color: #ffffff;
+                padding: 10px;
+                border: 1px solid rgb(8, 8, 8);
+                border-radius: 18px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            }
+    
+            .custom-form label {
+                display: block;
+                margin-bottom: 4px;
+                font-weight: bold;
+                color: #333333;
+            }
+    
+            .custom-form input[type="text"],
+            .custom-form select,
+            .custom-form input[type="submit"] {
+                width: 100%;
+                padding: 7px;
+                margin-bottom: 10px;
+                border: 1px solid #cccccc;
+                border-radius: 5px;
+                box-sizing: border-box;
+                transition: transform 0.3s ease;
+            }
+    
+            .custom-form input[type="submit"] {
+                background-color: #4caf50;
+                color: #ffffff;
+                cursor: pointer;
+            }
+    
+            .custom-form select:hover {
+                transform: scale(1.05);
+            }
+    
+            #result-count {
+            font-weight: bold;
+            font-size: 1.2em;  
+        }
+        </style>
+    
+        </div>
+      
+        <br>
+        <input type="submit" class="btn btn-success" value="Ajouter">
+    </form> 
+    <br><br><br>
+    <a href="{% url 'MajDonnee' %}" class="btn btn-warning">retour</a> 
+</div>
+<div class="col-sm-8">
+    <br>
+    <br>
+    <br>
+    <h4 class="text-center" style="color: #070707;">liste des programme</h4>
+    {% if donnees2 %}
+    <table class="table table-success table-striped">
+        <thead>      
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Nom Programme</th>
+            <th scope="col">Description Programme</th>
+            <th scope="col">Domaine Programme</th>
+            <th scope="col">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for donnee in donnees2 %}
+            <tr>
+            <th scope="row">{{donnee.id}}</th>
+            <td>{{donnee.nom_programme}}</td>
+            <td>{{donnee.description_programme}}</td>
+            <td>{{donnee.domaine_programme}}</td>
+
+            <td>
+                <div class="btn-group">
+                    <a href="{% url 'updateprogramme' donnee.id%}" class="btn btn-secondary btn-sm mx-3">Modifier</a> <!-- mx-3 me permet de separer les deux boutons -->
+                    <form action="{% url 'deleteprogramme' donnee.id %}" method="post" class="d-inline"> {% csrf_token %}
+                        <input type="submit" class="btn btn-danger btn-sm" value="Supprimer">
+                    </form>
+                </div>
+            </td>
+            
+            
+        </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+        
+        <!-- Ajoutez la pagination sous mon tableau -->
+    <div class="pagination">
+    <span class="step-links">
+        {% if donnees2.has_previous %}
+            <a href="?page=1" class=" btn btn-warning btn-sm">&laquo; debut</a>
+            <a href="?page={{ donnees2.previous_page_number }}" class=" btn btn-warning btn-sm">precedent</a>
+        {% endif %}
+        <span class="current-page">
+            Page {{ donnees2.number }} sur {{ donnees2.paginator.num_pages }}.
+        </span>
+        {% if donnees2.has_next %}
+            <a href="?page={{ donnees2.next_page_number }}" class=" btn btn-warning btn-sm">suivant</a>
+            <a href="?page={{ donnees2.paginator.num_pages }}" class=" btn btn-warning btn-sm">fin &raquo;</a>
+        {% endif %}
+    </span>
+    </div>
+<!-- Fin de la pagination -->
+    {% else %}
+    <h4 class="text-center alert alert alert-warning">Aucune donnée disponible pour le moment</h4>
+    {% endif %}
+</div>
+</div>
+<br><br>
+{% endblock content %}  

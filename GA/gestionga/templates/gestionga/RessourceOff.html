@@ -1,0 +1,79 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+<h4 class="text-center alert alert-info">Ressources GA Desactivees</h4> 
+<div class="row"> 
+<div class="col-sm-12 small-content">
+    <br>
+    {% if donnees17 %}
+    <br>
+    <table class="table table-dark table-striped">
+        <thead>      
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Nom</th>
+                <th scope="col">Prenom</th>
+                <th scope="col">Email</th>
+                <th scope="col">Matricule</th>
+                <th scope="col">Numero IP</th>
+                <th scope="col">Departement</th>
+                <th scope="col">Service</th>
+                <th scope="col">Statut</th>
+                <th scope="col">Manager</th>
+                <th scope="col">Date debut</th>
+                <th scope="col">Date fin</th>
+                <th scope="col">Date desactivation</th> 
+            </tr>
+        </thead>
+        <tbody>
+            {% for donnee in donnees17 %}
+            <tr>
+                <th scope="row">{{donnee.id}}</th>
+                <td>{{donnee.nom}}</td>
+                <td>{{donnee.prenom}}</td>
+                <td>{{donnee.email}}</td>
+                <td>{{donnee.matricule}}</td>
+                <td>{{donnee.numero_ip}}</td>
+                <td>{{donnee.departement}}</td>
+                <td>{{donnee.service}}</td>
+                <td>{{donnee.statut}}</td>
+                <td>{{donnee.manager}}</td>
+                <td>{{donnee.date_debut}}</td>
+                <td>{{donnee.date_fin}}</td>
+                <td>{{donnee.date_desactivation}}</td> 
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+        
+        <!-- Ajoutez la pagination sous mon tableau -->
+    <div class="pagination">
+    <span class="step-links">
+        {% if donnees17.has_previous %}
+            <a href="?page=1" class=" btn btn-warning btn-sm">&laquo; debut</a>
+            <a href="?page={{ donnees17.previous_page_number }}" class=" btn btn-warning btn-sm">precedent</a>
+        {% endif %}
+        <span class="current-page">
+            Page {{ donnees17.number }} sur {{ donnees17.paginator.num_pages }}.
+        </span>
+        {% if donnees17.has_next %}
+            <a href="?page={{ donnees17.next_page_number }}" class=" btn btn-warning btn-sm">suivant</a>
+            <a href="?page={{ donnees17.paginator.num_pages }}" class=" btn btn-warning btn-sm">fin &raquo;</a>
+        {% endif %}
+    </span>
+    </div>
+<!-- Fin de la pagination -->
+    {% else %}
+    <h4 class="text-center alert alert alert-warning">Aucune donnée disponible pour le moment</h4>
+    {% endif %}
+</div>
+</div>
+<br>
+    <a href="{% url 'tableau_ressource' %}" class="btn btn-success" style="margin-right: 20px;">Retour </a>
+   
+    <style>
+        .small-content {
+            font-size: 88%;
+        }
+    </style>
+<br><br>
+{% endblock content %}  

@@ -1,0 +1,61 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil utilisateur</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-container {
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        p {
+            margin: 10px 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        img {
+            width: 80%; /* Ajustez la largeur de l'image selon vos besoins */
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<br><br><br>
+<body>
+    <div class="profile-container">
+        <h2>Profil utilisateur</h2>
+        <p><strong>Nom:</strong> {{ nom }}</p>
+        <p><strong>Prénom:</strong> {{ prenom }}</p>
+        <p><strong>Email:</strong> {{ email }}</p>
+        <br>
+        <a href="{% url 'password_change' %}">Changer le mot de passe</a>
+    </div>
+   
+</body>
+</html>
+{% endblock content %}

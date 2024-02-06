@@ -1,0 +1,26 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+<br>
+<br>
+<div class="row">
+  <div class="col-sm-8" offset-2>    
+    <h4 class="text-center alert alert-info"> modifier le Domaine </h4> 
+    <div class="form-control">
+      <form action="" method="post">
+          {% csrf_token %}
+          {{fm1.as_p}}
+    </div>
+     <br>
+     <style>
+      /* CSS personnalisé pour assombrir les bordures des champs de formulaire */
+      .form-control {
+          border: 1px solid rgb(0, 3, 5); /* Couleur noire pour la bordure */
+          /* Autres styles de bordure personnalisés si nécessaire */
+      }
+     </style>
+        <input type="submit" class="btn btn-success" value="Modifier">
+        <a href="{% url 'ajoutdomaine' %}" class="btn btn-info">retour</a>
+      </form>
+  </div>
+</div>
+{% endblock content %}

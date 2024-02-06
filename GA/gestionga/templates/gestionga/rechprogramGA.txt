@@ -1,0 +1,285 @@
+{% extends 'gestionga/base.html' %}
+{% block content %}
+    <br>
+    <br>
+    <div class="row">
+        <div class="col-sm-5 mx-auto">
+            <h4 class="text-center alert alert-info">Rechercher</h4>
+            <div class="custom-form text-center">
+                <form action="" method="POST" id="search-form">
+                    {% csrf_token %}
+                    {{ form10.as_p }}
+                    <input type="submit" class="btn btn-success" value="Valider">
+                </form>
+            </div>
+            <br>
+        </div>
+    </div>
+    <br><br>
+    <div id="results-div">
+        <!-- Ajout du paragraphe pour afficher le nombre d'éléments -->
+        <p id="result-count" class="text-center"></p>
+
+        <table class="table table-success table-striped">
+            <thead>
+                <tr>
+                    <th>Module</th>
+                    <th>PROGRAMME</th>
+                    <th>Intitule</th>
+                    <th>CMIS</th>
+                </tr>
+            </thead>
+            <tbody id="results-tbody"></tbody>
+        </table>
+        <br>
+        <button id="download-btn" class="btn btn-primary" style="display: none;">Télécharger en Excel</button>
+    </div>
+    <br><br>
+
+    <style>
+        /* Ajoutez le CSS personnalisé pour le formulaire de recherche */
+        .custom-form {
+            background-color: #ffffff;
+            padding: 10px;
+            border: 1px solid rgb(8, 8, 8);
+            border-radius: 18px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .custom-form label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: bold;
+            color: #333333;
+        }
+
+        .custom-form input[type="text"],
+        .custom-form select,
+        .custom-form input[type="submit"] {
+            width: 100%;
+            padding: 7px;
+            margin-bottom: 10px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            transition: transform 0.3s ease;
+        }
+
+        .custom-form input[type="submit"] {
+            background-color: #4caf50;
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        .custom-form select:hover {
+            transform: scale(1.05);
+        }
+
+        #result-count {
+        font-weight: bold;
+        font-size: 1.2em;  
+    }
+    </style>
+    <script>    
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchForm = document.getElementById('search-form');
+            const tbody = document.getElementById('results-tbody');
+            const downloadBtn = document.getElementById('download-btn');
+            const resultCount = document.getElementById('result-count');  // Ajout de l'élément pour afficher le nombre
+
+            searchForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                // Effectuez la requête AJAX pour obtenir les résultats
+                fetch('/fonctionprogrammega', {
+                    method: 'POST',
+                    body: new FormData(searchForm),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const customResults = data.custom_results_list;
+
+                    if (customResults.length > 0) {
+                        // Affichez le nombre d'éléments
+                        resultCount.textContent = ` ${customResults.length} PROGRAMMES`;
+
+                        // Créez une chaîne HTML pour afficher les résultats
+                        const resultHTML = customResults.map(result => {
+                            return `
+                            <tr> 
+                                <td>${result.module}</td>
+                                <td>${result.programme_filiale}</td>
+                                <td>${result.intitule}</td>
+                                <td>${result.cmis}</td>
+                            </tr>
+                            `;
+                        }).join('');
+
+                        // Affichez les résultats dans l'élément tbody
+                        tbody.innerHTML = resultHTML;
+
+                        // Affichez le bouton de téléchargement
+                        downloadBtn.style.display = 'block';
+                    } else {
+                        // Aucun résultat trouvé, affichez un message
+                        resultCount.textContent = '';  // Masquez le nombre d'éléments s'il n'y a pas de résultats
+                        tbody.innerHTML = '';
+                        downloadBtn.style.display = 'none';  // Masquez le bouton de téléchargement s'il n'y a pas de résultats
+                        alert('Aucun résultat trouvé.');
+                    }
+                });
+            });
+
+            // Ajoutez un écouteur de clic pour le bouton de téléchargement
+            downloadBtn.addEventListener('click', function () {
+                // Effectuez la requête AJAX pour télécharger les résultats au format Excel
+                fetch('/telecharger_en_excel', { 
+                    method: 'POST',
+                    body: new FormData(searchForm),
+                })
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(new Blob([blob]));
+                    const a = document.createElement('a');
+
+                    a.href = url;
+                    a.download = 'resultats.xlsx';
+                    document.body.appendChild(a);
+
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                });
+            });
+        });
+    </script>
+{% endblock content %}
+
+
+
+###################################### VUE DE CE HTML PROGRAMME GA ########################
+
+def recherche_programme_GA(request):
+    form10 = Form_ProgrammeGA()
+    custom_results_list = []
+
+    if request.method == 'POST':
+        form10 = Form_ProgrammeGA(request.POST)
+        if form10.is_valid():
+            table = form10.cleaned_data['table']
+            cmis = form10.cleaned_data['cmis']
+            module = form10.cleaned_data['modules']
+
+            # Définir un dictionnaire pour mapper les noms de table aux classes correspondantes
+            table_mapping = {
+                'Sgci': Sgci,
+                'Sgsn': Sgsn,
+                'Sgbe': Sgbe,
+                'Sgtg': Sgtg,
+                'Sgbf': Sgbf,
+                'Sgcongo': Sgcongo,
+                'Sgcam': Sgcam,
+                'Sgm': Sgm,
+            }
+
+            # Vérifier si la table sélectionnée existe dans le mapping
+            if table in table_mapping:
+                results = table_mapping[table].objects.all()
+
+                # Filtrer par CMIS
+                if cmis:
+                    results = results.filter(cmis=cmis) 
+
+                # Filtrer par module
+                if module:
+                    results = results.filter(module=module)
+
+                # Créer la liste des résultats finaux
+                custom_results_list = [
+                    {
+                        'module': getattr(item, 'module', ''),
+                        'programme_filiale': getattr(item, 'programme_filiale', ''),
+                        'intitule': getattr(item, 'intitule', ''),  # Assurez-vous que intitule existe dans votre modèle
+                        'cmis': getattr(item, 'cmis', ''),  # Assurez-vous que cmis existe dans votre modèle
+                    }
+                    for item in results
+                ]
+
+                return JsonResponse({'custom_results_list': custom_results_list})
+    else:
+        form10 = Form_ProgrammeGA()
+
+    return render(request, 'gestionga/rechprogrammega.html', {'form10': form10})
+
+
+############################## EXTRACTION PAR EXCEL ###################################3
+
+def telecharger_en_excel(request):
+    form10 = Form_ProgrammeGA()
+    custom_results_list = []
+
+    if request.method == 'POST':
+        form10 = Form_ProgrammeGA(request.POST)
+        if form10.is_valid():
+            table = form10.cleaned_data['table']
+            cmis = form10.cleaned_data['cmis']
+            module = form10.cleaned_data['modules']
+
+            # Définir un dictionnaire pour mapper les noms de table aux classes correspondantes
+            table_mapping = {
+                'Sgci': Sgci,
+                'Sgsn': Sgsn,
+                'Sgbe': Sgbe,
+                'Sgtg': Sgtg,
+                'Sgbf': Sgbf,
+                'Sgcongo': Sgcongo,
+                'Sgcam': Sgcam,
+                'Sgm': Sgm,
+            }
+
+            # Vérifier si la table sélectionnée existe dans le mapping
+            if table in table_mapping:
+                results = table_mapping[table].objects.all()
+
+                # Filtrer par CMIS
+                if cmis:
+                    results = results.filter(cmis=cmis)
+
+                # Filtrer par module
+                if module:
+                    results = results.filter(module=module)
+
+                # Créer la liste des résultats finaux
+                custom_results_list = [
+                    {
+                        'module': getattr(item, 'module', ''),
+                        'programme_filiale': getattr(item, 'programme_filiale', ''),
+                        'intitule': getattr(item, 'intitule', ''),  # Assurez-vous que intitule existe dans votre modèle
+                        'cmis': getattr(item, 'cmis', ''),  # Assurez-vous que cmis existe dans votre modèle
+                    }
+                    for item in results
+                ]
+
+                # Générer le fichier Excel
+                response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                response['Content-Disposition'] = 'attachment; filename=resultats.xlsx'
+                workbook = Workbook()
+                worksheet = workbook.active
+
+                # Ajouter les en-têtes
+                headers = ['Module', 'Programme Filiale', 'Intitule', 'CMIS']
+                worksheet.append(headers)
+
+                # Ajouter les données
+                for result in custom_results_list:
+                    row = [result['module'], result['programme_filiale'], result['intitule'], result['cmis']]
+                    worksheet.append(row)
+
+                # Sauvegarder le fichier Excel dans la réponse HTTP
+                workbook.save(response)
+                return response
+
+    else:
+        form10 = Form_ProgrammeGA()
+
+    return render(request, 'gestionga/rechprogrammega.html', {'form10': form10})
+
